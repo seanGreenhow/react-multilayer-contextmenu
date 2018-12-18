@@ -11,7 +11,7 @@ export namespace Context {
         currentContextMenu = new ContextMenuObject(x, y)
     }
     export function finalize() {
-        let result = currentContextMenu
+        const result = currentContextMenu
         currentContextMenu = null
         return result
     }
@@ -35,7 +35,7 @@ class ContextMenuObject {
 
 class ContextCaptureLayer extends Layer<{ wrapper: MultilayerWithContext }> {
     render() {
-        return (<div id="ContextCaptureLayer" style={layerStyles} ref={(ref) => this.ref = ref}
+        return (<div id="ContextCaptureLayer" style={layerStyles} ref={this.ref}
             onContextMenu={(e) => Context.create(e.clientX, e.clientY)}
             onClick={() => this.props.wrapper.closeContextMenu()}
         />)
@@ -44,7 +44,7 @@ class ContextCaptureLayer extends Layer<{ wrapper: MultilayerWithContext }> {
 
 class ContextNotifierLayer extends Layer<{ wrapper: MultilayerWithContext }> {
     render() {
-        return (<div id="ContextNotifierLayer" style={Object.assign({ pointerEvents: 'all' }, layerStyles)} ref={(ref) => this.ref = ref}
+        return (<div id="ContextNotifierLayer" style={Object.assign({ pointerEvents: 'all' }, layerStyles)} ref={this.ref}
             onContextMenu={(e) => {
                 e.preventDefault()
                 this.props.wrapper.setState({
@@ -60,7 +60,7 @@ class ContextNotifierLayer extends Layer<{ wrapper: MultilayerWithContext }> {
 class ContextDrawLayer extends Layer<{ context: ContextMenuObject } & MultilayerContextProps, ContextMenuState> {
     render() {
         return (
-            <div id="ContextDrawLayer" style={layerStyles} ref={ref => this.ref = ref}>
+            <div id="ContextDrawLayer" style={layerStyles} ref={this.ref}>
                 <ContextMenu {...this.props} />
             </div>
         )
@@ -73,7 +73,7 @@ interface ContextMenuState {
     transparent: boolean
 }
 class ContextMenu extends React.Component<{ context: ContextMenuObject, relativeElement?: HTMLElement, parent?: HTMLElement } & MultilayerContextProps, ContextMenuState>{
-    div: Div
+    div = React.createRef<Div>()
 
     constructor(props) {
         super(props)
@@ -91,11 +91,11 @@ class ContextMenu extends React.Component<{ context: ContextMenuObject, relative
         let realX = x
         let realY = y
 
-        let width = this.div.ref.offsetWidth
-        let height = this.div.ref.offsetHeight
+        let width = this.div.current.ref.current.offsetWidth
+        let height = this.div.current.ref.current.offsetHeight
 
         if (this.props.parent) {
-            let parentBox = this.props.parent.getBoundingClientRect()
+            const parentBox = this.props.parent.getBoundingClientRect()
             realX += parentBox.left
             realY += parentBox.top
         }
@@ -118,14 +118,14 @@ class ContextMenu extends React.Component<{ context: ContextMenuObject, relative
     }
 
     componentDidUpdate(prevProps: { context: ContextMenuObject }) {
-        let needsUpdate = prevProps.context !== this.props.context;
+        const needsUpdate = prevProps.context !== this.props.context
         if (needsUpdate) this.updatePosition()
     }
 
     render() {
         return (
             <Div
-                ref={ref => this.div = ref}
+                ref={this.div}
                 onClick={(e) => e.preventDefault()}
                 style={Object.assign(
                     {
@@ -182,7 +182,7 @@ export class ContextLabel extends ContextMenuEntry {
 }
 
 export class ContextSubmenu extends ContextMenuEntry<{ label: React.ReactChild }, { submenu: ContextMenuObject, hover: boolean }> {
-    div: Div
+    div = React.createRef<Div>()
 
     constructor(props) {
         super(props)
@@ -196,7 +196,7 @@ export class ContextSubmenu extends ContextMenuEntry<{ label: React.ReactChild }
         const { submenuStyle, submenuHoverStyle } = this.props
 
         return (<Div
-            ref={ref => this.div = ref}
+            ref={this.div}
 
             style={Object.assign(
                 {}, defaultEntryStyles, {
@@ -211,12 +211,12 @@ export class ContextSubmenu extends ContextMenuEntry<{ label: React.ReactChild }
             )}
 
             onMouseEnter={e => {
-                let box = this.div.ref.getBoundingClientRect()
-                let parentBox = this.props.parent.div.ref.getBoundingClientRect()
-                let x = this.div.ref.offsetWidth
-                let y = box.top - parentBox.top
+                const box = this.div.current.ref.current.getBoundingClientRect()
+                const parentBox = this.props.parent.div.current.ref.current.getBoundingClientRect()
+                const x = this.div.current.ref.current.offsetWidth
+                const y = box.top - parentBox.top
 
-                let submenu = new ContextMenuObject(x, y)
+                const submenu = new ContextMenuObject(x, y)
                 React.Children.forEach(this.props.children, child => {
                     submenu.addEntry(child)
                 })
@@ -230,8 +230,8 @@ export class ContextSubmenu extends ContextMenuEntry<{ label: React.ReactChild }
         >
             {this.props.label}
             {this.state.submenu && this.state.hover && <ContextMenu
-                relativeElement={this.div.ref}
-                parent={this.props.parent.div.ref}
+                relativeElement={this.div.current.ref.current}
+                parent={this.props.parent.div.current.ref.current}
                 context={this.state.submenu}
                 buttonStyle={this.props.buttonStyle}
                 buttonHoverStyle={this.props.buttonHoverStyle}

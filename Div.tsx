@@ -1,7 +1,7 @@
 import * as React from "react"
 
 export default class Div extends React.Component<{ hoverStyle?: React.CSSProperties } & React.HTMLAttributes<HTMLDivElement>, { hover: boolean }> {
-    ref: HTMLDivElement;
+    readonly ref = React.createRef<HTMLDivElement>()
 
     constructor(props: Readonly<{ hoverStyle: React.CSSProperties; } & React.HTMLAttributes<HTMLDivElement>>) {
         super(props)
@@ -15,7 +15,7 @@ export default class Div extends React.Component<{ hoverStyle?: React.CSSPropert
 
         return (
             <div
-                ref={ref => this.ref = ref}
+                ref={this.ref}
                 onMouseEnter={(e) => {
                     this.setState({ hover: true })
                     if (onMouseEnter) onMouseEnter(e)
