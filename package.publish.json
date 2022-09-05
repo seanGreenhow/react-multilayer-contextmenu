@@ -1,11 +1,11 @@
 {
   "name": "react-multilayer-context",
-  "version": "0.4.1",
+  "version": "0.6.0",
   "main": "index.js",
   "license": "GPL-3.0-or-later",
   "author": "Sean Greenhow (sean@hamburg.de)",
   "peerDependencies": {
-    "react": "^16.6.0",
-    "react-multilayer": "^0.8.2"
+    "react": "^18.2.0",
+    "react-multilayer": "^0.10.0"
   }
 }
